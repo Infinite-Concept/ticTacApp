@@ -50,6 +50,16 @@ const HistoryScreen = () => {
         fetchData()
     }, [])
 
+    const showHistory = (item) => {
+        console.log(item.item);
+        const{date, playerTwoName, scored} = item.item
+        return (
+        <View>
+
+        </View>)
+        
+    }
+
   return (
     <View style={styles.homeScreen}>
         <View style={styles.historyTextCon}>
@@ -80,6 +90,7 @@ const HistoryScreen = () => {
                         <FlatList
                             data={history}
                             keyExtractor={item => item.id}
+                            renderItem={showHistory}
                         />
                     </>
                     :
