@@ -1,10 +1,14 @@
 const router = require("express").Router()
 const History = require("../model/History")
+const mongoose = require("mongoose");
 
 router.get("/get-scored/:userId", async (req, res) => {
     try {
-
         const {userId} = req.params
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ success: false, message: "Invalid user ID" });
+        }
 
         let history = await History.find({
             $or: [{ playerOne: userId }, { playerTwo: userId }],
@@ -65,6 +69,51 @@ router.get("/get-history/:userId", async (req, res) => {
                 success: false,
                 message: "Play some game."
             })
+        }
+
+        const score = []
+        history.forEach((value) => {
+            let inner = {
+                id: value._id,
+                playerOneID: value.playerOne.id,
+                playerOneName: value.playerOne.userName,
+                playerTwoID: value.playerTwo.id,
+                playerTwoName: value.playerTwo.userName,
+                scored: value.scored,
+                date: value.createdAt
+            }
+            
+            score.push(inner)
+        })
+
+        res.json({
+            success: true,
+            message: score
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message: "Internal server Error"})
+    }
+})
+
+router.get("/limit-history/:userId", async (req, res) => {
+    try {
+
+        const {userId} = req.params
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ success: false, message: "Invalid user ID" });
+        }
+
+        let history = await History.find({
+            $or: [{ playerOne: userId }, { playerTwo: userId }],
+        }).populate("playerOne playerTwo", "userName avatar").limit(4); 
+
+        if(!history){
+            return res.json({
+                success: false,
+                message: "Play some game."
+            })
         }     
 
         const score = []
@@ -76,8 +125,9 @@ router.get("/get-history/:userId", async (req, res) => {
                 playerTwoID: value.playerTwo.id,
                 playerTwoName: value.playerTwo.userName,
                 scored: value.scored,
-                date: value.createdAt.toLocaleDateString()
+                date: value.createdAt
             }
+            
             score.push(inner)
         })
 
@@ -85,6 +135,7 @@ router.get("/get-history/:userId", async (req, res) => {
             success: true,
             message: score
         })
+        
     } catch (error) {
         console.log(error);
         res.status(500).json({message: "Internal server Error"})

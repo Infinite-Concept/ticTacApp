@@ -6,6 +6,7 @@ import Refresh from "../common/image/Refresh"
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLogin } from '../context/LoginProvider'
+import { envValue } from '../env';
 
 const LoadingScreen = ({navigation}) => {
 
@@ -17,7 +18,7 @@ const LoadingScreen = ({navigation}) => {
     const fetch = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        let response = await axios.get("http://192.168.1.36:5678/auth/auth-user", {
+        let response = await axios.get(`${envValue}/auth/auth-user`, {
           headers : {
             Authorization : `Bearer ${token}`
           }

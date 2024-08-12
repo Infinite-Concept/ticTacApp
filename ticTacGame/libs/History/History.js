@@ -1,39 +1,18 @@
-// import axios from "axios";
-
-// export const useFetchHistory = async (profile, setHistory) => {
-//     try {
-//         let response = await axios.get(`http://192.168.1.36:5678/history/get-scored/${profile._id.toString()}`)
-//         let data = await response.data 
-//         if (data.success) {
-//             setHistory(data.message);
-//             console.log("History updated:", data.message);
-//         } else {
-//             console.error("Failed to fetch history:", data.message);
-//         }
-//     } catch (error) {
-//         console.error("Error fetching history:", error);
-//     }
-// }
-
 
 import axios from "axios";
 import { useEffect } from "react";
+import { envValue } from "../../env";
 
 export const useFetchHistoryEffect = (profile, setHistory) => {
     useEffect(() => {
         const fetchHistory = async () => {
-            if (!profile || !profile._id) {
-                console.error("Profile ID is not available.");
-                return;
-            }
 
             try {
-                let response = await axios.get(`http://192.168.1.36:5678/history/get-scored/${profile._id}`);
+                let response = await axios.get(`${envValue}/history/get-scored/${profile._id}`);
                 let data = response.data;
                 
                 if (data.success) {
                     setHistory(data.message);
-                    console.log("History updated:", data.message);
                 } else {
                     console.error("Failed to fetch history:", data.message);
                 }
@@ -46,25 +25,23 @@ export const useFetchHistoryEffect = (profile, setHistory) => {
     }, [profile, setHistory]);
 };
 
-export const useFetchHistory = (profile) => {
+export const useFetchHistory = (profile, setHistoryBoard) => {
     useEffect(() => {
         const fetchHistory = async () => {
-            if (!profile || !profile._id) {
-                console.error("Profile ID is not available.");
-                return;
-            }
 
             try {
-                let response = await axios.get(`http://192.168.1.36:5678/history/get-scored/${profile._id}`);
+                let response = await axios.get(`${envValue}/history/limit-history/${profile._id}`);
                 let data = response.data;
                 
                 if (data.success) {
-                    console.log("History updated:", data.message);
+                    setHistoryBoard(data.message)
                 } else {
                     console.error("Failed to fetch history:", data.message);
+                    setHistoryBoard([])
                 }
             } catch (error) {
                 console.error("Error fetching history:", error);
+                setHistoryBoard([])
             }
         };
 

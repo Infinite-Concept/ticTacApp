@@ -1,16 +1,43 @@
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native'
-import React, { useEffect } from 'react'
-import { DARK_THEME, NEUTRAL } from '../common/color'
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, FlatList } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { DARK_THEME, LIGHT_THEME, NEUTRAL } from '../common/color'
 import { useLogin } from "../context/LoginProvider"
-import {useFetchHistoryEffect} from '../libs/History/History'
+import {useFetchHistoryEffect, useFetchHistory} from '../libs/History/History'
+import moment from 'moment'
 
 const LoggedInScreen = ({ navigation }) => {
-  const{profile, history, setHistory} = useLogin()
+  const{profile} = useLogin()
+  const[history, setHistory] = useState([])
+  const[historyBoard, setHistoryBoard] = useState([])
 
   useFetchHistoryEffect(profile, setHistory)
+  useFetchHistory(profile, setHistoryBoard)
 
+  const showHistory = (item) => {
+    const{date, playerTwoName, scored} = item.item
 
-const userInfo = null
+    const getColor = () => {
+      if(scored == 'won'){
+          return LIGHT_THEME.green
+      }else if(scored == 'lost'){
+          return LIGHT_THEME.red
+      }else{
+          return NEUTRAL.gray
+      }
+    }
+    return (
+      <View style={styles.historyItem}>
+          <View style={styles.historyItemSec1}>
+              <Text style={styles.historyItemText1}>{playerTwoName}</Text>
+              <Text style={styles.historyItemText2}>{moment(date).format('DD.MM.YYYY')}</Text>
+          </View>
+
+          <Text style={[styles.historyItemText3, {color: getColor()}]}>{scored}</Text>
+      </View>
+    ) 
+  }
+
+  const userInfo = null
   return (
     <ScrollView style={styles.loggedIn}>
       <View style={styles.userLogged}>
@@ -45,14 +72,17 @@ const userInfo = null
           <Text style={[styles.userText, styles.historyText]}>Game History</Text>
         </TouchableOpacity>
         <View style={styles.historyBoard}>
-          {userInfo == null ? (
+          {historyBoard || historyBoard.length == 0 ? (
+            <FlatList
+              data={historyBoard}
+              keyExtractor={item => item.id}
+              renderItem={showHistory}
+              contentContainerStyle={{ paddingVertical: 10, paddingHorizontal: 10 }}
+            />
+          ) : (
             <View style={styles.emptyHistory}>
               <Text style={styles.emptyHistoryA}>Empty</Text>
               <Text style={styles.emptyHistoryB}>Play some game.</Text>
-            </View>
-          ) : (
-            <View>
-              <Text>There is data</Text>
             </View>
           ) }
         </View>
@@ -94,7 +124,7 @@ const styles = StyleSheet.create({
   },
   userText: {
     fontSize: 18,
-    fontFamily: "Roboto-Regular",
+    fontFamily: "Roboto-Bold",
     textAlign: "center",
     color: NEUTRAL.gray
   },
@@ -133,14 +163,14 @@ const styles = StyleSheet.create({
     height: 30
   },
   history:{
-      paddingTop: 20
+    paddingTop: 20
   },
   historyText: {
     textAlign: "left",
     marginBottom: 10
   },
   historyBoard: {
-    height: 130,
+    height: 185,
     backgroundColor: DARK_THEME.barker_blue,
     borderRadius: 10
   },
@@ -158,5 +188,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Roboto-Regular",
     color: NEUTRAL.darker_gray
+  },
+  historyItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingBottom: 5,
+    alignItems: "center"
+  },
+  historyItemSec1: {
+    gap: 3
+  },
+  historyItemText1: {
+    color: NEUTRAL.gray,
+    fontSize: 14,
+    fontFamily: "Roboto-Medium"
+  },
+  historyItemText2: {
+    fontSize: 12,
+    color: NEUTRAL.dark_gray,
+    fontFamily: "Roboto-Regular"
+  },
+  historyItemText3: {
+    fontSize: 14,
+    textTransform: "uppercase",
+    fontFamily: "Roboto-Bold"
   }
 })

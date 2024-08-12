@@ -1,9 +1,41 @@
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DARK_THEME, NEUTRAL } from '../common/color'
 import Search from "../common/image/Search"
+import { useLogin } from '../context/LoginProvider'
+import { WEB_SOCKET_URL } from '../env'
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs()
 
 const PlayerScreen = ({ navigation }) => {
+  const {profile} = useLogin()
+  const [onlineUsers, setOnlineUsers] = useState([]);
+
+  const socketService = async () => {
+    let socket = new WebSocket(WEB_SOCKET_URL);
+
+    socket.onopen = () => {
+      console.log('WebSocket connection established');
+      socket.send(JSON.stringify({ userId: profile._id }));
+    };
+  
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data);
+      
+    };
+    
+    socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    }; 
+
+  }
+
+  useEffect(() => {
+    socketService()
+    
+  }, [])
 
   return (
     <View style={styles.homeScreen}>

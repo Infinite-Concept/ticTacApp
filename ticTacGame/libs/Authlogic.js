@@ -1,6 +1,7 @@
 import { Alert } from 'react-native'
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { envValue } from '../env';
 
 const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -41,7 +42,7 @@ export const handleRegister = async (ErrorMessage, emailValue, passwordValue, co
   }
 
   try {
-    const response = await axios.post("http://192.168.43.150:5678/auth/register", {
+    const response = await axios.post(`${envValue}/auth/register`, {
       email, password, userName
     })
 
@@ -88,7 +89,7 @@ export const handleLogin = async (ErrorMessage, emailValue, passwordValue, navig
     }
 
     try {
-      const response = await axios.post("http://192.168.1.36:5678/auth/login", {
+      const response = await axios.post(`${envValue}/auth/login`, {
         email, password
       })
 

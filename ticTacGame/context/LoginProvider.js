@@ -6,10 +6,9 @@ const LoginProvider = ({ children }) => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const[profile, setProfile] = useState([])
-  const[history, setHistory] = useState([])
 
   return (
-    <LoginContext.Provider  value={{ isLoggedIn, setIsLoggedIn, profile, setProfile, history, setHistory }}>
+    <LoginContext.Provider  value={{ isLoggedIn, setIsLoggedIn, profile, setProfile}}>
       {children}
     </LoginContext.Provider>
   )

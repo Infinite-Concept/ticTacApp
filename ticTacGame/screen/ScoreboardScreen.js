@@ -12,7 +12,7 @@ const ScoreboardScreen = () => {
     <View style={styles.homeScreen}>
         <View style={styles.historyTextCon}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
-                <BackArrow />
+                <BackArrow color={NEUTRAL.gray} />
             </TouchableOpacity>
             <Text style={styles.historyText}>Scoreboard</Text>
         </View>
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
         gap: 20
     },
     historyText: {
-        color: NEUTRAL.dark_gray,
+        color: NEUTRAL.gray,
         fontFamily: 'Roboto-Medium',
         fontSize: 24
     },
