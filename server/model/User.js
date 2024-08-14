@@ -26,7 +26,8 @@ const UserSchema = new mongoose.Schema({
     resetPasswordCodeExpires: { type: Date },
     resetPasswordToken: {type: String},
     isOnline: { type: Boolean, default: false },
-    lastSeen: { type: Date, default: Date.now }
+    lastSeen: { type: Date, default: Date.now },
+    inGame: {type: Boolean, default: false }
 })
 
 module.exports = mongoose.model("user", UserSchema)

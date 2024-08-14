@@ -45,16 +45,16 @@ wss.on('connection', async (socket) => {
         const data = JSON.parse(message);
         const { userId } = data;
 
-        const user = await User.findById(userId).select('userName');
+        const user = await User.findById(userId).select('userName inGame');
         if(user){
-            onlineUsers[userId] = { socket, userName: user.userName };
+            onlineUsers[userId] = { socket, userName: user.userName, inGame: user.inGame };
             broadcastOnlineUsers();
             
         }else {
             console.log(`User not found: ${userId}`);
         }
     } catch (error) {
-        console.error('Error processing message', err);
+        console.error('Error processing message', error);
     }
   });
 
@@ -70,7 +70,7 @@ wss.on('connection', async (socket) => {
   });
 
   function broadcastOnlineUsers() {
-    const onlineUserList = Object.entries(onlineUsers).map(([userId, { userName }]) => ({ userId, userName }));
+    const onlineUserList = Object.entries(onlineUsers).map(([userId, { userName, inGame }]) => ({ userId, userName, inGame }));
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({ type: 'onlineUsers', users: onlineUserList }));

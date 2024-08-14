@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView, FlatList } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, FlatList, RefreshControl } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
 import { DARK_THEME, LIGHT_THEME, NEUTRAL } from '../common/color'
 import { useLogin } from "../context/LoginProvider"
 import {useFetchHistoryEffect, useFetchHistory} from '../libs/History/History'
@@ -9,17 +9,18 @@ const LoggedInScreen = ({ navigation }) => {
   const{profile} = useLogin()
   const[history, setHistory] = useState([])
   const[historyBoard, setHistoryBoard] = useState([])
+  const [refreshing, setRefreshing] = useState(false);
 
   useFetchHistoryEffect(profile, setHistory)
   useFetchHistory(profile, setHistoryBoard)
 
   const showHistory = (item) => {
-    const{date, playerTwoName, scored} = item.item
+    const{date, opponent, outcome} = item.item
 
     const getColor = () => {
-      if(scored == 'won'){
+      if(outcome == 'won'){
           return LIGHT_THEME.green
-      }else if(scored == 'lost'){
+      }else if(outcome == 'lost'){
           return LIGHT_THEME.red
       }else{
           return NEUTRAL.gray
@@ -28,18 +29,31 @@ const LoggedInScreen = ({ navigation }) => {
     return (
       <View style={styles.historyItem}>
           <View style={styles.historyItemSec1}>
-              <Text style={styles.historyItemText1}>{playerTwoName}</Text>
+              <Text style={styles.historyItemText1}>{opponent}</Text>
               <Text style={styles.historyItemText2}>{moment(date).format('DD.MM.YYYY')}</Text>
           </View>
 
-          <Text style={[styles.historyItemText3, {color: getColor()}]}>{scored}</Text>
+          <Text style={[styles.historyItemText3, {color: getColor()}]}>{outcome}</Text>
       </View>
     ) 
   }
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+
+    // Re-fetch history data
+    useFetchHistoryEffect(profile, setHistory);
+    useFetchHistory(profile, setHistoryBoard);
+
+    // Simulate a delay to mimic network request
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, [profile]);
+
   const userInfo = null
   return (
-    <ScrollView style={styles.loggedIn}>
+    <ScrollView style={styles.loggedIn} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       <View style={styles.userLogged}>
         <Text style={styles.userText}>Welcome</Text>
         <Text style={styles.userText2}>{profile.userName}</Text>

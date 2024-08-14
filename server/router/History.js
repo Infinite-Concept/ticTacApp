@@ -2,10 +2,10 @@ const router = require("express").Router()
 const History = require("../model/History")
 const mongoose = require("mongoose");
 
-router.get("/get-scored/:userId", async (req, res) => {
+router.get("/user-stats/:userId", async (req, res) => {
     try {
         const {userId} = req.params
-
+        
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({ success: false, message: "Invalid user ID" });
         }
@@ -26,16 +26,13 @@ router.get("/get-scored/:userId", async (req, res) => {
         let losses = 0;
 
         history.forEach((game) => {
-            if (game.scored) {
-              if (game.scored === 'draw') {
-                draws++;
-              } else if (game.scored === 'won') {
+            
+            if (game.winner == userId) {
                 wins++;
-              } else {
-                losses++;
-              }
+            } else if (game.scored === 'draw') {
+                draws++;
             } else {
-              draws++; // Assuming no winner means a draw
+                losses++;
             }
         });
 
@@ -60,6 +57,10 @@ router.get("/get-history/:userId", async (req, res) => {
 
         const {userId} = req.params
 
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ success: false, message: "Invalid user ID" });
+        }
+
         let history = await History.find({
             $or: [{ playerOne: userId }, { playerTwo: userId }],
         }).populate("playerOne playerTwo", "userName avatar")
@@ -71,24 +72,22 @@ router.get("/get-history/:userId", async (req, res) => {
             })
         }
 
-        const score = []
-        history.forEach((value) => {
-            let inner = {
-                id: value._id,
-                playerOneID: value.playerOne.id,
-                playerOneName: value.playerOne.userName,
-                playerTwoID: value.playerTwo.id,
-                playerTwoName: value.playerTwo.userName,
-                scored: value.scored,
-                date: value.createdAt
-            }
-            
-            score.push(inner)
-        })
+        const games = history.map((game) => {
+            return {
+                id: game._id,
+                opponent: game.playerOne._id.toString() === userId ? game.playerTwo.userName : game.playerOne.userName,
+                outcome: game.winner
+                    ? game.winner.toString() !== userId
+                        ? 'won'
+                        : 'lost'
+                    : 'draw',
+                date: game.createdAt
+            };
+        });
 
         res.json({
             success: true,
-            message: score
+            message: games
         })
     } catch (error) {
         console.log(error);
@@ -107,35 +106,32 @@ router.get("/limit-history/:userId", async (req, res) => {
 
         let history = await History.find({
             $or: [{ playerOne: userId }, { playerTwo: userId }],
-        }).populate("playerOne playerTwo", "userName avatar").limit(4); 
+        }).populate("playerOne playerTwo", "userName avatar").limit(4)
 
         if(!history){
             return res.json({
                 success: false,
                 message: "Play some game."
             })
-        }     
+        }
 
-        const score = []
-        history.forEach((value) => {
-            let inner = {
-                id: value._id,
-                playerOneID: value.playerOne.id,
-                playerOneName: value.playerOne.userName,
-                playerTwoID: value.playerTwo.id,
-                playerTwoName: value.playerTwo.userName,
-                scored: value.scored,
-                date: value.createdAt
-            }
-            
-            score.push(inner)
-        })
+        const games = history.map((game) => {
+            return {
+                id: game._id,
+                opponent: game.playerOne._id.toString() === userId ? game.playerTwo.userName : game.playerOne.userName,
+                outcome: game.winner
+                    ? game.winner.toString() !== userId
+                        ? 'won'
+                        : 'lost'
+                    : 'draw',
+                date: game.createdAt
+            };
+        });
 
         res.json({
             success: true,
-            message: score
+            message: games
         })
-        
     } catch (error) {
         console.log(error);
         res.status(500).json({message: "Internal server Error"})
@@ -145,7 +141,7 @@ router.get("/limit-history/:userId", async (req, res) => {
 router.post("/history", async (req, res) => {
     try {
 
-        const {playerOne, playerTwo, scored} = req.body
+        const {playerOne, playerTwo, scored, winner} = req.body
 
         const user = await History.findById(playerOne)
         const user2 = await History.findById(playerTwo)
@@ -160,7 +156,8 @@ router.post("/history", async (req, res) => {
         const gameHistory = new History({
             playerOne,
             playerTwo,
-            scored
+            scored,
+            winner : winner || null
         })
 
         await gameHistory.save();

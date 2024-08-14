@@ -8,7 +8,7 @@ export const useFetchHistoryEffect = (profile, setHistory) => {
         const fetchHistory = async () => {
 
             try {
-                let response = await axios.get(`${envValue}/history/get-scored/${profile._id}`);
+                let response = await axios.get(`${envValue}/history/user-stats/${profile._id}`);
                 let data = response.data;
                 
                 if (data.success) {

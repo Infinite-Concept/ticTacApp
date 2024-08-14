@@ -68,12 +68,12 @@ const HistoryScreen = () => {
 
     const showHistory = (item) => {
 
-        const{date, playerTwoName, scored} = item.item
+        const{date, opponent, outcome} = item.item
 
         const getColor = () => {
-            if(scored == 'won'){
+            if(outcome == 'won'){
                 return LIGHT_THEME.green
-            }else if(scored == 'lost'){
+            }else if(outcome == 'lost'){
                 return LIGHT_THEME.red
             }else{
                 return NEUTRAL.gray
@@ -82,11 +82,11 @@ const HistoryScreen = () => {
         return (
         <View style={styles.historyItem}>
             <View style={styles.historyItemSec1}>
-                <Text style={styles.historyItemText1}>{playerTwoName}</Text>
+                <Text style={styles.historyItemText1}>{opponent}</Text>
                 <Text style={styles.historyItemText2}>{moment(date).format('DD.MM.YYYY')}</Text>
             </View>
 
-            <Text style={[styles.historyItemText3, {color: getColor()}]}>{scored}</Text>
+            <Text style={[styles.historyItemText3, {color: getColor()}]}>{outcome}</Text>
         </View>)
         
     }

@@ -1,6 +1,6 @@
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Button, FlatList, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { DARK_THEME, NEUTRAL } from '../common/color'
+import { DARK_THEME, LIGHT_THEME, NEUTRAL } from '../common/color'
 import Search from "../common/image/Search"
 import { useLogin } from '../context/LoginProvider'
 import { WEB_SOCKET_URL } from '../env'
@@ -21,9 +21,9 @@ const PlayerScreen = ({ navigation }) => {
     };
   
     socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log(data);
-      
+      const {users} = JSON.parse(event.data);
+      // const filteredUsers = users.filter(user => user.userId !== profile._id )
+      setOnlineUsers(users)
     };
     
     socket.onerror = (error) => {
@@ -37,6 +37,26 @@ const PlayerScreen = ({ navigation }) => {
     
   }, [])
 
+  const showOnlineUser = (item) => {
+      const {inGame, userName} = item.item
+      
+      return (
+        <View style={styles.userCon}>
+          <View style={styles.userCol}>
+            <Text style={styles.userColTextName}>{userName}</Text>
+            <View style={styles.userOnline}>
+              <View style={[styles.userOnlineCircle, {backgroundColor: inGame ? LIGHT_THEME.red : LIGHT_THEME.green }]}></View>
+              <Text style={styles.userOnlineText}>{inGame ? "Playing" : "Online"}</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.userBtn}>
+            <Text style={styles.userBtnText}>Invite</Text>
+          </TouchableOpacity>
+        </View>
+      )
+  }
+
   return (
     <View style={styles.homeScreen}>
         <View style={styles.historyTextCon}>
@@ -48,14 +68,26 @@ const PlayerScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.calenderContainer}>
-            <Search />
-            <TextInput style={styles.calenderContainerText} placeholder='Search Players' placeholderTextColor={NEUTRAL.darker_gray} />
+          <Search />
+          <TextInput style={styles.calenderContainerText} placeholder='Search Players' placeholderTextColor={NEUTRAL.darker_gray} />
         </TouchableOpacity>
 
-
-        <ScrollView>
-
-        </ScrollView>
+        <View style={{paddingTop: 35}}>
+          {
+            onlineUsers.length > 0 ?
+            <FlatList
+              data={onlineUsers}
+              keyExtractor={item => item.id}
+              renderItem={showOnlineUser}
+              contentContainerStyle={{gap: 20}}
+            />
+            :
+            <View style={styles.noUsers}>
+              <Text style={styles.noUsersText1}>No Players Online</Text>
+              <Text style={styles.noUsersText2}>Please come again later.</Text>
+            </View>
+          }
+        </View>
     </View>
   )
 }
@@ -99,5 +131,60 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     paddingLeft: 20,
     marginBottom: 20
+  },
+  noUsers: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 200
+  },
+  noUsersText1: {
+    fontSize: 18,
+    fontFamily: "Roboto-Medium",
+    color: NEUTRAL.gray
+  },
+  noUsersText2: {
+    fontSize: 14,
+    fontFamily: "Roboto-Regular",
+    color: NEUTRAL.dark_gray
+  },
+  userCon: {
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexDirection: "row"
+  },
+  userCol: {
+    gap: 5
+  },
+  userColTextName: {
+    fontSize: 16,
+    fontFamily: "Roboto-Regular",
+    color: NEUTRAL.gray
+  },
+  userOnline: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10
+  },
+  userOnlineCircle: {
+    width: 10,
+    height: 10,
+    borderRadius: 150
+  },
+  userOnlineText: {
+    fontSize: 12,
+    fontFamily: "Roboto-Regular",
+    color: NEUTRAL.gray
+  },
+  userBtn: {
+    borderColor: NEUTRAL.gray,
+    borderWidth: 1,
+    borderRadius: 7,
+    paddingVertical: 7,
+    paddingHorizontal: 15
+  },
+  userBtnText: {
+    fontSize: 12,
+    fontFamily: "Roboto-Regular",
+    color: NEUTRAL.gray
   }
 })
