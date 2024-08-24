@@ -29,7 +29,6 @@ const PlayerScreen = ({ navigation }) => {
     socket.onerror = (error) => {
         console.error('WebSocket error:', error);
     }; 
-
   }
 
   useEffect(() => {
@@ -37,8 +36,13 @@ const PlayerScreen = ({ navigation }) => {
     
   }, [])
 
+  const handleInvite = (userId) => {
+    console.log(userId);
+    
+  }
+
   const showOnlineUser = (item) => {
-      const {inGame, userName} = item.item
+      const {inGame, userName, userId} = item.item      
       
       return (
         <View style={styles.userCon}>
@@ -50,7 +54,7 @@ const PlayerScreen = ({ navigation }) => {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.userBtn}>
+          <TouchableOpacity style={styles.userBtn} onPress={() => handleInvite(userId)} >
             <Text style={styles.userBtnText}>Invite</Text>
           </TouchableOpacity>
         </View>

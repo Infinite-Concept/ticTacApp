@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { envValue } from "../../env";
 
 export const useFetchHistoryEffect = (profile, setHistory) => {
-    useEffect(() => {
+    // useEffect(() => {
         const fetchHistory = async () => {
 
             try {
@@ -22,11 +22,11 @@ export const useFetchHistoryEffect = (profile, setHistory) => {
         };
 
         fetchHistory();
-    }, [profile, setHistory]);
+    // }, [profile, setHistory]);
 };
 
 export const useFetchHistory = (profile, setHistoryBoard) => {
-    useEffect(() => {
+    // useEffect(() => {
         const fetchHistory = async () => {
 
             try {
@@ -46,5 +46,5 @@ export const useFetchHistory = (profile, setHistoryBoard) => {
         };
 
         fetchHistory();
-    }, [profile]);
+    // }, [profile]);
 };

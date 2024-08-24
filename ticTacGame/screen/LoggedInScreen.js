@@ -11,12 +11,19 @@ const LoggedInScreen = ({ navigation }) => {
   const[historyBoard, setHistoryBoard] = useState([])
   const [refreshing, setRefreshing] = useState(false);
 
-  useFetchHistoryEffect(profile, setHistory)
-  useFetchHistory(profile, setHistoryBoard)
+  const fetchHistoryData = () => {
+    useFetchHistoryEffect(profile, setHistory)
+    useFetchHistory(profile, setHistoryBoard)
+  }
 
-  const showHistory = (item) => {
-    const{date, opponent, outcome} = item.item
+  useEffect(() => {
+    fetchHistoryData()
+  }, [profile])
 
+  const showHistory = (item, index) => {
+    const{date, opponent, outcome} = item
+    console.log(item);
+    
     const getColor = () => {
       if(outcome == 'won'){
           return LIGHT_THEME.green
@@ -27,7 +34,7 @@ const LoggedInScreen = ({ navigation }) => {
       }
     }
     return (
-      <View style={styles.historyItem}>
+      <View style={styles.historyItem} key={index}>
           <View style={styles.historyItemSec1}>
               <Text style={styles.historyItemText1}>{opponent}</Text>
               <Text style={styles.historyItemText2}>{moment(date).format('DD.MM.YYYY')}</Text>
@@ -40,15 +47,11 @@ const LoggedInScreen = ({ navigation }) => {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-
-    // Re-fetch history data
-    useFetchHistoryEffect(profile, setHistory);
-    useFetchHistory(profile, setHistoryBoard);
-
+    fetchHistoryData()
     // Simulate a delay to mimic network request
     setTimeout(() => {
       setRefreshing(false);
-    }, 2000);
+    }, 1000);
   }, [profile]);
 
   const userInfo = null
@@ -87,12 +90,15 @@ const LoggedInScreen = ({ navigation }) => {
         </TouchableOpacity>
         <View style={styles.historyBoard}>
           {historyBoard || historyBoard.length == 0 ? (
-            <FlatList
-              data={historyBoard}
-              keyExtractor={item => item.id}
-              renderItem={showHistory}
-              contentContainerStyle={{ paddingVertical: 10, paddingHorizontal: 10 }}
-            />
+            <View style={{ paddingVertical: 10, paddingHorizontal: 10 }}>
+              {historyBoard.map((item, index) => {
+                showHistory(item, index)
+              })}
+            </View>
+              // data={historyBoard}
+              // keyExtractor={item => item.id}
+              // renderItem={showHistory}
+              // contentContainerStyle={{ paddingVertical: 10, paddingHorizontal: 10 }}
           ) : (
             <View style={styles.emptyHistory}>
               <Text style={styles.emptyHistoryA}>Empty</Text>
