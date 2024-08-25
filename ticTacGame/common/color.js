@@ -25,4 +25,23 @@ const DARK_THEME = {
     dark: '#0C1017'
 }
 
+export const LIGHT_MODE = {
+    white: "#FFFFFF",
+    black: "#000000",
+    secondary: "#ADADAD",
+    bg: "#46A3FF",
+    lightBlue: "#46A3FF",
+    lightGray: "#E3E3E3"
+}
+
+export const DARK_MODE = {
+    white: "#0C1017",
+    black: "#ADADAD",
+    secondary: "#575757",
+    bg: "#212835",
+    lightBlue: "#2475C5",
+    lightGray: "#212835"
+}
+
+
 export {DARK_THEME, NEUTRAL, LIGHT_THEME}

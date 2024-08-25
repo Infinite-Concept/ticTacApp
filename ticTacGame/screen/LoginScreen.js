@@ -18,7 +18,7 @@ const LoginScreen = ({ navigation }) => {
   const[confirmPassword, setConfirmPassword] = useState("")
   const [errorMessage, setErrorMessage] = useState('');
   // ======== end form state 
-  const { setIsLoggedIn, setProfile } = useLogin();
+  const { setIsLoggedIn, setProfile, mode } = useLogin();
 
   const clear = () => {
       setErrorMessage('');
@@ -41,25 +41,25 @@ const LoginScreen = ({ navigation }) => {
   }
 
   return (
-    <ScrollView style={styles.login}>
+    <ScrollView style={[styles.login, {backgroundColor: mode.white}]}>
         <View style={styles.loginContainer}>
 
-          <TouchableOpacity activeOpacity={0.6} style={styles.backBtn} onPress={() => navigation.goBack()}>
-            <BackArrow color="#ffffff" />
+          <TouchableOpacity activeOpacity={0.6} style={[styles.backBtn, {backgroundColor: mode.black}]} onPress={() => navigation.goBack()}>
+            <BackArrow color={mode.white} />
           </TouchableOpacity>
 
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Welcome Back!</Text>
-                <Text style={styles.headerDesc}>You will get 7 days free trial on creating new account. Make sure you use correct informations</Text>
+                <Text style={[styles.headerTitle, {color: mode.black}]}>Welcome Back!</Text>
+                <Text style={[styles.headerDesc, {color: mode.secondary}]}>You will get 7 days free trial on creating new account. Make sure you use correct informations</Text>
             </View>
 
             <View style={styles.authContainer}>
                 <TouchableOpacity onPress={showSignIn} activeOpacity={0.6}>
-                    <Text style={styles.authText}>Login</Text>
+                    <Text style={[styles.authText, {color: mode.secondary}]}>Login</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={showSignUp} activeOpacity={0.6}>
-                    <Text style={styles.authText}>Sign In</Text>
+                    <Text style={[styles.authText, {color: mode.secondary}]}>Sign In</Text>
                 </TouchableOpacity>
             </View>
 
@@ -68,25 +68,25 @@ const LoginScreen = ({ navigation }) => {
               signUp && (
                 <View style={{gap: 15}}>
                   <Input place="Enter your username" value={userName} onChange={setUserName} keyboardType="default" secureTextEntry={false} >
-                    <MessageIcon />
+                    <MessageIcon color={mode.secondary} />
                   </Input>
 
                   <Input place="Enter your email Address" value={email} onChange={setEmail} keyboardType="email-address" secureTextEntry={false} >
-                    <MessageIcon />
+                    <MessageIcon color={mode.secondary} />
                   </Input>
 
                   <Input place="Choose password" value={password} onChange={setPassword} keyboardType="default" secureTextEntry={true}>
-                    <LockIcon />
+                    <LockIcon color={mode.secondary}/>
                   </Input>
 
                   <Input place="Confirm Password" value={confirmPassword} onChange={setConfirmPassword} keyboardType="default" secureTextEntry={true} >
-                    <LockIcon />
+                    <LockIcon color={mode.secondary}/>
                   </Input>
 
                   {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
 
-                  <TouchableOpacity style={styles.logIn} onPress={ () =>  handleRegister(setErrorMessage, email, password, confirmPassword, userName, showSignIn )} activeOpacity={0.6} >
-                    <Text style={[styles.authenThirdText, {color: "#ffffff"}]}>Register</Text>
+                  <TouchableOpacity style={[styles.logIn, {backgroundColor: mode.lightBlue}]} onPress={() =>  handleRegister(setErrorMessage, email, password, confirmPassword, userName, showSignIn )} activeOpacity={0.6} >
+                    <Text style={[styles.authenThirdText, {color: mode.white}]}>Register</Text>
                   </TouchableOpacity>
                 </View>
               )
@@ -96,21 +96,21 @@ const LoginScreen = ({ navigation }) => {
               signIn && (
                 <View style={{gap: 15}}>
                   <Input place="Enter your email Address" value={email} onChange={setEmail} keyboardType="email-address" secureTextEntry={false}  >
-                    <MessageIcon />
+                    <MessageIcon color={mode.secondary} />
                   </Input>
 
                   <Input place="Enter your password" value={password} onChange={setPassword} keyboardType="default" secureTextEntry={true} >
-                    <LockIcon />
+                    <LockIcon color={mode.secondary} />
                   </Input>
 
                   {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
 
                   <TouchableOpacity style={styles.forget} activeOpacity={0.6}>
-                    <Text style={styles.forgetText}>forget password</Text>
+                    <Text style={[styles.forgetText, {color: mode.black}]}>forget password</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={styles.logIn} activeOpacity={0.6} onPress={ () => handleLogin(setErrorMessage, email, password, navigation )}>
-                    <Text style={[styles.authenThirdText, {color: "#ffffff"}]}>Login</Text>
+                  <TouchableOpacity style={[styles.logIn, {backgroundColor: mode.lightBlue}]} activeOpacity={0.6} onPress={ () => handleLogin(setErrorMessage, email, password, navigation )}>
+                    <Text style={[styles.authenThirdText, {color: mode.white}]}>Login</Text>
                   </TouchableOpacity>
                 </View>
               )
@@ -126,8 +126,7 @@ export default LoginScreen
 
 const styles = StyleSheet.create({
     login: {
-        flex: 1,
-        backgroundColor: DARK_THEME.dark,
+        flex: 1
     },
     loginContainer: {
         paddingHorizontal: 20,
@@ -161,7 +160,6 @@ const styles = StyleSheet.create({
         fontSize: 12
     },
     logIn: {
-        backgroundColor: DARK_THEME.blue,
         borderRadius: 18,
         alignItems: "center",
         paddingVertical: 12
@@ -186,7 +184,6 @@ const styles = StyleSheet.create({
         paddingVertical: 10
     },
     backBtn: {
-      backgroundColor: DARK_THEME.blue,
       width: 30,
       height: 30,
       borderRadius: 100,

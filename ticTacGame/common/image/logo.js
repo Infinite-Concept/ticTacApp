@@ -1,6 +1,6 @@
 import * as React from "react"
 import Svg, { Path } from "react-native-svg"
-const SvgComponent = (props) => (
+const SvgComponent = ({props, color}) => (
   <Svg
     xmlns="http://www.w3.org/2000/svg"
     width={158}
@@ -9,7 +9,7 @@ const SvgComponent = (props) => (
     {...props}
   >
     <Path
-      fill="#ADADAD"
+      fill={color}
       d="M0 26.906 32.55 0H158l-32.55 26.906h-22.965v82.566L70.563 136V26.906H0Z"
     />
   </Svg>

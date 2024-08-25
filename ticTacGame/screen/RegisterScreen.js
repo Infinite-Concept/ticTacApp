@@ -6,37 +6,33 @@ import Facebook from '../common/image/Facebook.js'
 import { DARK_THEME, NEUTRAL } from '../common/color'
 import LoadingScreen from './LoadingScreen.js'
 import ErrorScreen from './ErrorScreen.js'
+import { useLogin } from '../context/LoginProvider.js'
 
 
 const RegisterScreen = ({ navigation }) => {
-
-
-  const userInfo = {
-    name: "Stefan Jovanovic"
-  }
-
+  const{mode} = useLogin()
   return (
-    <ScrollView style={styles.registerScreen}>
+    <ScrollView style={[styles.registerScreen, {backgroundColor: mode.white}]}>
       <View style={{flex: 1, paddingTop: 130, alignItems: "center"}}>
         <View style={styles.partOne}>
-          <Logo />
-          <Text style={styles.registerText}>Welcome</Text>
-          <Text style={styles.registerDesc}>Please sign in to continue.</Text>
+          <Logo color={mode.black} />
+          <Text style={[styles.registerText, {color: mode.black}]}>Welcome</Text>
+          <Text style={[styles.registerDesc, {color: mode.secondary}]}>Please sign in to continue.</Text>
         </View>
 
         <View style={styles.registerAuth}>
-          <TouchableOpacity style={styles.authPart}>
+          <TouchableOpacity style={[styles.authPart, {borderColor: mode.secondary }]}>
               <Google />
-              <Text style={styles.authText}>Sign in with Google</Text>
+              <Text style={[styles.authText, {color: mode.black}]}>Sign in with Google</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.authPart} onPress={() => navigation.navigate('Home', { screen: 'LoggedIn' })}>
+          <TouchableOpacity style={[styles.authPart, {borderColor: mode.secondary }]} onPress={() => navigation.navigate('Home', { screen: 'LoggedIn' })}>
               <Facebook />
-              <Text style={styles.authText}>Sign in with Facebook</Text>
+              <Text style={[styles.authText, {color: mode.black}]}>Sign in with Facebook</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('Login')} >
-              <Text style={[styles.authText, {textAlign: "center"}]}>Create an Account</Text>
+              <Text style={[styles.authText, {textAlign: "center", color: mode.black}]}>Create an Account</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -49,15 +45,11 @@ export default RegisterScreen
 const styles = StyleSheet.create({
     registerScreen: {
         flex: 1,
-        backgroundColor: DARK_THEME.dark,
-        // height: 900
     },
     partOne: {
-        // top: 150
         position: "relative"
     },
     registerText: {
-        color: NEUTRAL.gray,
         fontFamily: "Roboto-Medium",
         fontSize: 24,
         textAlign: "center",
@@ -66,7 +58,6 @@ const styles = StyleSheet.create({
     registerDesc: {
         textAlign: "center",
         marginTop: 10,
-        color: NEUTRAL.darker_gray,
         fontSize: 16
     },
     registerAuth: {
@@ -80,13 +71,11 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         gap: 15,
         alignItems: "center",
-        borderWidth: 2,
-        borderColor: NEUTRAL.darker_gray,
+        borderWidth: 1,
         paddingHorizontal: 15,
         paddingVertical: 15
     },
     authText: {
-        color: NEUTRAL.gray,
         fontSize: 16
     }
 })

@@ -1,11 +1,13 @@
 import { Image, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect } from 'react'
 import Logo from '../common/image/logo.js'
-import { DARK_THEME } from '../common/color'
 import { StatusBar } from 'expo-status-bar'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLogin } from '../context/LoginProvider.js';
 
 const SplashScreen = ({ navigation }) => {
+
+  const{mode} = useLogin()
 
   useEffect(() => {
     const change = async () => {
@@ -33,9 +35,9 @@ const SplashScreen = ({ navigation }) => {
   }, []);
 
   return (
-    <View style={styles.home}>
+    <View style={[styles.home, {backgroundColor: mode.white}]}>
       <StatusBar hidden />
-      <Logo />
+      <Logo color={mode.black} />
     </View>
   )
 }
@@ -46,7 +48,6 @@ const styles = StyleSheet.create({
   home: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: DARK_THEME.dark
+    alignItems: 'center'
   }
 })

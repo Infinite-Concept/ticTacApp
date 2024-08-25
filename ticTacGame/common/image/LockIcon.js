@@ -1,6 +1,6 @@
 import * as React from "react"
 import Svg, { Path } from "react-native-svg"
-const SvgComponent = (props) => (
+const SvgComponent = ({props, color}) => (
   <Svg
     xmlns="http://www.w3.org/2000/svg"
     width={14}
@@ -9,14 +9,14 @@ const SvgComponent = (props) => (
     {...props}
   >
     <Path
-      stroke="#8F8996"
+      stroke={color}
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.2}
       d="M10.318 6.086v-1.61a3.414 3.414 0 0 0-3.414-3.414 3.413 3.413 0 0 0-3.427 3.399v1.625"
     />
     <Path
-      stroke="#8F8996"
+      stroke={color}
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.2}
@@ -24,7 +24,7 @@ const SvgComponent = (props) => (
       clipRule="evenodd"
     />
     <Path
-      stroke="#8F8996"
+      stroke={color}
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.2}

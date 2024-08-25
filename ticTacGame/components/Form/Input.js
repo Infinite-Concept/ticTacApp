@@ -1,13 +1,16 @@
 import { StyleSheet, TextInput, View, Dimensions } from 'react-native'
 import React from 'react'
+import { useLogin } from '../../context/LoginProvider'
 
 const width = Dimensions.get("window").width
 
 const Input = ({place, value, onChange, children, keyboardType, secureTextEntry}) => {
+  const{mode} = useLogin()
+
   return (
-    <View style={styles.input_group}>
+    <View style={[styles.input_group, {borderColor: mode.secondary} ]}>
         {children}
-      <TextInput placeholder={place} style={styles.input} placeholderTextColor="#8F8996" onChangeText={onChange} value={value} keyboardType={keyboardType} secureTextEntry={secureTextEntry}/>
+      <TextInput placeholder={place} style={[styles.input, {color: mode.secondary}]} placeholderTextColor={mode.secondary} onChangeText={onChange} value={value} keyboardType={keyboardType} secureTextEntry={secureTextEntry}/>
     </View>
   )
 }
@@ -17,7 +20,6 @@ export default Input
 const styles = StyleSheet.create({
     input_group: {
         borderWidth: 1,
-        borderColor: "#6D6D6D",
         borderRadius: 18,
         alignItems: 'center',
         flexDirection: "row",
@@ -27,6 +29,5 @@ const styles = StyleSheet.create({
     },
     input: {
         fontSize: 14,
-        color: "#8F8996",
     },
 })

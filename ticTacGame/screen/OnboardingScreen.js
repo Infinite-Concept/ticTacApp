@@ -1,5 +1,4 @@
 import { FlatList, SafeAreaView, StyleSheet, Text, View, Dimensions, Image, TouchableOpacity } from 'react-native'
-import { SvgXml } from 'react-native-svg';
 import React, { useRef, useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import OnboardingOne from "../common/image/OnboardingOne.js"
@@ -7,6 +6,7 @@ import OnboardingTwo from "../common/image/OnboardingTwo.js"
 import OnboardingThree from "../common/image/OnboardingThree.js"
 import { DARK_THEME, NEUTRAL } from '../common/color'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLogin } from '../context/LoginProvider.js';
 
 const DATA = [
   {
@@ -35,6 +35,8 @@ const OnboardingScreen = () => {
   const screenWidth = Dimensions.get("window").width
   const[activeIndex, setActiveIndex] = useState(0)
   const navigation = useNavigation();
+  const{mode} = useLogin()
+  
 
   const getItemLayout = (data, index) => ({
     length: screenWidth,
@@ -81,8 +83,8 @@ const OnboardingScreen = () => {
               {item.img}
             </View>
             
-            <Text style={{color: NEUTRAL.gray, fontSize: 24, marginTop: 38, fontFamily: "Roboto-Medium"}}>{item.title}</Text>
-            <Text style={{color: NEUTRAL.gray, marginTop: 15, textAlign: 'center', paddingHorizontal: 20, lineHeight: 15, fontSize: 16, fontFamily: "Roboto-Regular"}}>{item.desc}</Text>
+            <Text style={{color: mode.black, fontSize: 24, marginTop: 38, fontFamily: "Roboto-Medium"}}>{item.title}</Text>
+            <Text style={{color: mode.black, marginTop: 15, textAlign: 'center', paddingHorizontal: 20, lineHeight: 15, fontSize: 16, fontFamily: "Roboto-Regular"}}>{item.desc}</Text>
         </View>
     )
   }
@@ -93,13 +95,13 @@ const OnboardingScreen = () => {
         // if the active index === index 
         if(activeIndex === index){
             return(
-                <View style={{backgroundColor: DARK_THEME.blue, height: 12, width: 12, borderRadius: 5, marginHorizontal: 6}}>
+                <View style={{backgroundColor: mode.lightBlue, height: 12, width: 12, borderRadius: 5, marginHorizontal: 6}}>
                 </View>
             )
         }
         else{
             return(
-                <View key={index} style={{backgroundColor: DARK_THEME.bark_blue, height: 12, width: 12, borderRadius: 5, marginHorizontal: 6}}>         
+                <View key={index} style={{backgroundColor: mode.lightGray, height: 12, width: 12, borderRadius: 5, marginHorizontal: 6}}>         
                 </View>
             )
         }
@@ -107,7 +109,7 @@ const OnboardingScreen = () => {
   }
 
   return (
-    <View style={styles.onboard}>
+    <View style={[styles.onboard, {backgroundColor: mode.white}]}>
       <SafeAreaView style={styles.onboardArea}>
 
         <FlatList
@@ -127,7 +129,7 @@ const OnboardingScreen = () => {
           <View>
             {activeIndex !== 0 && (
               <TouchableOpacity onPress={handleBack} >
-                <Text style={[styles.nextButtonText, {color: NEUTRAL.darker_gray}]}>Back</Text>
+                <Text style={[styles.nextButtonText, {color: mode.black + "4D"}]}>Back</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -139,7 +141,7 @@ const OnboardingScreen = () => {
           <View>
             {activeIndex !== DATA.length && (
               <TouchableOpacity onPress={handleNext} >
-                <Text style={styles.nextButtonText}>{activeIndex === DATA.length - 1 ? 'Login' : 'Next'}</Text>
+                <Text style={[styles.nextButtonText, {color: mode.black}]}>{activeIndex === DATA.length - 1 ? 'Login' : 'Next'}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -156,8 +158,7 @@ export default OnboardingScreen
 
 const styles = StyleSheet.create({
   onboard: {
-    flex: 1,
-    backgroundColor: DARK_THEME.dark
+    flex: 1
   },
   onboardArea: {
     flex: 1,
@@ -173,6 +174,5 @@ const styles = StyleSheet.create({
   nextButtonText: {
     fontSize: 14,
     fontFamily: "Roboto-Medium",
-    color: NEUTRAL.gray,
   }
 })
