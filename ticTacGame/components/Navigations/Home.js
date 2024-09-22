@@ -6,6 +6,7 @@ import ProfileScreen from '../../screen/ProfileScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Foundation, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { DARK_THEME } from '../../common/color';
+import SettingScreen from '../../screen/SettingScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -33,6 +34,13 @@ const Home = () => {
           options={{
             tabBarIcon: ({focused}) => (
               <FontAwesome5 name="user-friends" size={22} color={focused ? "#ADADAD" : "#12161F"} />
+            )
+          }}
+        />
+        <Tab.Screen name="Setting" component={SettingScreen} 
+          options={{
+            tabBarIcon: ({focused}) => (
+              <MaterialIcons name="settings" size={26} color={focused ? "#ADADAD" : "#12161F"} />
             )
           }}
         />

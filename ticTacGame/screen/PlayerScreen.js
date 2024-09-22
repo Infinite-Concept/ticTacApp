@@ -1,5 +1,5 @@
-import { Button, FlatList, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { Button, FlatList, Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
 import { DARK_THEME, LIGHT_THEME, NEUTRAL } from '../common/color'
 import Search from "../common/image/Search"
 import { useLogin } from '../context/LoginProvider'
@@ -11,34 +11,93 @@ LogBox.ignoreAllLogs()
 const PlayerScreen = ({ navigation }) => {
   const {profile} = useLogin()
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [inviterId, setInviterId] = useState(null);  // Add inviter ID state
+  const socketRef = useRef(null);
 
   const socketService = async () => {
-    let socket = new WebSocket(WEB_SOCKET_URL);
+    socketRef.current = new WebSocket(WEB_SOCKET_URL);
 
-    socket.onopen = () => {
-      console.log('WebSocket connection established');
-      socket.send(JSON.stringify({ userId: profile._id }));
+    socketRef.current.onopen = () => {
+      socketRef.current.send(JSON.stringify({ userId: profile._id }));
     };
   
-    socket.onmessage = (event) => {
-      const {users} = JSON.parse(event.data);
+    socketRef.current.onmessage = (event) => {
+
+      try {
+        const data = JSON.parse(event.data);
+        console.log(data);
+      
+        // Check if users are being received
+        if (data.type === 'onlineUsers') {
+          return setOnlineUsers(data.users); // Set the online users
+        }
+
+        if (data.type === 'gameInvitation') {
+          console.log('Game invitation received');
+          setInviterId(data.fromUser);
+          showModal()
+          return  // Set the online users
+        }
+      
       // const filteredUsers = users.filter(user => user.userId !== profile._id )
-      setOnlineUsers(users)
+      } catch (error) {
+        console.log(error);
+        
+      }
     };
     
-    socket.onerror = (error) => {
+    socketRef.current.onerror = (error) => {
         console.error('WebSocket error:', error);
     }; 
   }
 
   useEffect(() => {
     socketService()
-    
   }, [])
 
   const handleInvite = (userId) => {
-    console.log(userId);
-    
+    if (socketRef.current) {
+      socketRef.current.send(
+        JSON.stringify({
+          type: 'inviteToGame',
+          userId: profile._id,
+          toUser: userId,
+        })
+      );
+    }
+  };
+ 
+  // Decline invitation
+  const handleCancel = () => {
+    if (socketRef.current) {
+      socketRef.current.send(
+        JSON.stringify({
+          type: 'declineInvite',
+          userId: profile._id,
+          toUser: inviterId,  // Use inviter ID from state
+        })
+      );
+      setModalVisible(false);  // Close the modal after declining
+    }
+  };
+
+  // Accept invitation
+  const handleAccept = () => {
+    if (socketRef.current) {
+      socketRef.current.send(
+        JSON.stringify({
+          type: 'acceptInvite',
+          userId: profile._id,
+          toUser: inviterId,  // Use inviter ID from state
+        })
+      );
+      setModalVisible(false);  // Close the modal after accepting
+    }
+  };
+
+  const showModal = () => {
+    setModalVisible(true)
   }
 
   const showOnlineUser = (item) => {
@@ -81,7 +140,7 @@ const PlayerScreen = ({ navigation }) => {
             onlineUsers.length > 0 ?
             <FlatList
               data={onlineUsers}
-              keyExtractor={item => item.id}
+              keyExtractor={item => item.userId}
               renderItem={showOnlineUser}
               contentContainerStyle={{gap: 20}}
             />
@@ -92,6 +151,35 @@ const PlayerScreen = ({ navigation }) => {
             </View>
           }
         </View>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            Alert.alert('Modal has been closed.');
+            setModalVisible(!modalVisible);
+          }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>Game Invitation!</Text>
+              <Text>You are invited to a game </Text>
+              <Text>By <Text style={styles.modalTextName}>James Mike</Text></Text>
+              
+              <View style={styles.modalBtn}>
+                <TouchableOpacity onPress={handleCancel}
+                  style={[styles.modalbutton, styles.modalbuttonClose]}>
+                  <Text style={styles.modaltextStyle}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={handleAccept}
+                  style={[styles.modalbutton, styles.modalbuttonAccept]}>
+                  <Text style={[styles.modaltextStyle, styles.modalAcceptTextStyle,]}>Accept</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
     </View>
   )
 }
@@ -190,5 +278,64 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Roboto-Regular",
     color: NEUTRAL.gray
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalBtn: {
+    width: "90%",
+    display: "flex",
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20
+  },
+  modalbutton: {
+    width: "45%",
+    borderRadius: 20,
+    padding: 10,
+  },
+  modaltextStyle: {
+    textAlign: "center"
+  },
+  modalbuttonAccept: {
+    backgroundColor: NEUTRAL.dark_gray,
+    elevation: 2,
+  },
+  modalbuttonClose: {
+    borderColor: NEUTRAL.dark_gray,
+    borderWidth: 1,
+    borderStyle: "solid"
+  },
+  modalAcceptTextStyle: {
+    color: "#fff"
+  },
+  modalText: {
+    textTransform: "uppercase",
+    fontSize: 20,
+    fontFamily: 'Roboto-Bold',
+    marginBottom: 4
+  },
+  modalTextName: {
+    color: NEUTRAL.black,
+    fontFamily: 'Roboto-Bold',
   }
 })

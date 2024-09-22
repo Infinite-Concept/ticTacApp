@@ -21,8 +21,7 @@ const LoggedInScreen = ({ navigation }) => {
   }, [profile])
 
   const showHistory = (item, index) => {
-    const{date, opponent, outcome} = item
-    console.log(item);
+    const{date, opponent, outcome} = item.item
     
     const getColor = () => {
       if(outcome == 'won'){
@@ -33,11 +32,12 @@ const LoggedInScreen = ({ navigation }) => {
           return NEUTRAL.gray
       }
     }
+
     return (
       <View style={styles.historyItem} key={index}>
           <View style={styles.historyItemSec1}>
-              <Text style={styles.historyItemText1}>{opponent}</Text>
-              <Text style={styles.historyItemText2}>{moment(date).format('DD.MM.YYYY')}</Text>
+            <Text style={styles.historyItemText1}>{opponent}</Text>
+            <Text style={styles.historyItemText2}>{moment(date).format('DD.MM.YYYY')}</Text>
           </View>
 
           <Text style={[styles.historyItemText3, {color: getColor()}]}>{outcome}</Text>
@@ -56,7 +56,7 @@ const LoggedInScreen = ({ navigation }) => {
 
   const userInfo = null
   return (
-    <ScrollView style={styles.loggedIn} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+    <ScrollView style={styles.loggedIn} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} showsVerticalScrollIndicator={false}>
       <View style={styles.userLogged}>
         <Text style={styles.userText}>Welcome</Text>
         <Text style={styles.userText2}>{profile.userName}</Text>
@@ -89,22 +89,19 @@ const LoggedInScreen = ({ navigation }) => {
           <Text style={[styles.userText, styles.historyText]}>Game History</Text>
         </TouchableOpacity>
         <View style={styles.historyBoard}>
-          {historyBoard || historyBoard.length == 0 ? (
-            <View style={{ paddingVertical: 10, paddingHorizontal: 10 }}>
-              {historyBoard.map((item, index) => {
-                showHistory(item, index)
-              })}
-            </View>
-              // data={historyBoard}
-              // keyExtractor={item => item.id}
-              // renderItem={showHistory}
-              // contentContainerStyle={{ paddingVertical: 10, paddingHorizontal: 10 }}
+          {historyBoard.length > 0 ? (
+            <FlatList 
+              data={historyBoard}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={showHistory}
+              contentContainerStyle={{ paddingVertical: 15, paddingHorizontal: 10 }}
+            />
           ) : (
             <View style={styles.emptyHistory}>
               <Text style={styles.emptyHistoryA}>Empty</Text>
-              <Text style={styles.emptyHistoryB}>Play some game.</Text>
+              <Text style={styles.emptyHistoryB}>Play some games.</Text>
             </View>
-          ) }
+          )}
         </View>
       </View>
 
@@ -190,7 +187,7 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   historyBoard: {
-    height: 185,
+    height: 200,
     backgroundColor: DARK_THEME.barker_blue,
     borderRadius: 10
   },
