@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View, Dimensions } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { DARK_THEME, NEUTRAL } from '../common/color'
 import { StatusBar } from 'expo-status-bar';
+import { WEB_SOCKET_URL } from '../env';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -9,15 +10,32 @@ const ResponsiveView = () => {
     return <View style={styles.item} />;
 };
 
-const MultiPlayerLoading = ({navigation}) => {
+const MultiPlayerLoading = ({navigation, route }) => {
 
-    // useEffect(() => {
-    //     const timer = setTimeout(() => {
-    //       navigation.replace('Gameboard'); 
-    //     }, 3000); 
+    const { inviterId, inviteeId } = route.params;
+    const [ready, setReady] = useState(false);
+    const socketRef = useRef(null);
     
-    //     return () => clearTimeout(timer);
-    //   }, []);
+    useEffect(() => {
+        socketRef.current = new WebSocket(WEB_SOCKET_URL);
+    
+        socketRef.current.onopen = () => {
+          socketRef.current.send(JSON.stringify({ userId: inviteeId })); // Send inviteeId when connecting
+        };
+    
+        socketRef.current.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+    
+          if (data.type === 'startGame') {
+            // Navigate to the multiplayer game screen once both players are ready
+            navigation.navigate('MultiPlayer', { inviterId, inviteeId });
+          }
+        };
+    
+        return () => {
+          socketRef.current.close();
+        };
+    }, []);
 
   return (
     <View style={styles.GameBoard}>

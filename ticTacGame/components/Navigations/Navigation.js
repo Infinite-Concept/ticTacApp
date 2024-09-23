@@ -10,6 +10,8 @@ import GameBoard from '../../screen/GameBoard';
 import Home from './Home';
 import LoginScreen from '../../screen/LoginScreen';
 import LoadingScreen from '../../screen/LoadingScreen';
+import MultiPlayerLoading from '../../screen/MultiPlayerLoading'
+import MultiPlayerScreen from '../../screen/MultiPlayerScreen';
 
 const Stack = createNativeStackNavigator();
 const userInfo = {}
@@ -30,7 +32,8 @@ const Navigation = () => {
         <Stack.Screen name="GameboardLoading" component={GameBoardLoading} />
         <Stack.Screen name="Gameboard" component={GameBoard} />
         <Stack.Screen name="LoginLoading" component={LoadingScreen} />
-
+        <Stack.Screen name="MultiLoading" component={MultiPlayerLoading} />
+        <Stack.Screen name="MultiPlayer" component={MultiPlayerScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   )

@@ -12,6 +12,8 @@ const PlayerScreen = ({ navigation }) => {
   const {profile} = useLogin()
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [declineVisible, setDeclineVisible] = useState(false);
+  const [declineMsg, setDeclineMsg] = useState('');
   const [inviterId, setInviterId] = useState(null);  // Add inviter ID state
   const socketRef = useRef(null);
 
@@ -37,6 +39,30 @@ const PlayerScreen = ({ navigation }) => {
           console.log('Game invitation received');
           setInviterId(data.fromUser);
           showModal()
+          return  // Set the online users
+        }
+
+        if (data.type === 'inviteDeclined') {
+          console.log('Game invitation decline');
+          
+          if(data.invitee){
+            setDeclineMsg(`Your game invitation was decline by ${data.inviteeName}`)
+          }else{
+            setDeclineMsg(`You just decline a game invite sent by ${data.inviterName}`)
+          }
+          showDeclineModal()
+
+          setTimeout(() => {
+            setDeclineVisible(false)
+          }, 3000)
+          return  // Set the online users
+        }
+
+        if (data.type === 'inviteAccepted') {
+          navigation.navigate('MultiLoading', {
+            inviterId: inviterId,
+            inviteeId: profile._id,
+          });
           return  // Set the online users
         }
       
@@ -100,6 +126,10 @@ const PlayerScreen = ({ navigation }) => {
     setModalVisible(true)
   }
 
+  const showDeclineModal = () => {
+    setDeclineVisible(true)
+  }
+
   const showOnlineUser = (item) => {
       const {inGame, userName, userId} = item.item      
       
@@ -160,8 +190,8 @@ const PlayerScreen = ({ navigation }) => {
             Alert.alert('Modal has been closed.');
             setModalVisible(!modalVisible);
           }}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
+          <View style={[styles.centeredView, {justifyContent: 'center', alignItems: 'center', marginTop: 22}]}>
+            <View style={[styles.modalView, {margin: 20, borderRadius: 20, padding: 20,}]}>
               <Text style={styles.modalText}>Game Invitation!</Text>
               <Text>You are invited to a game </Text>
               <Text>By <Text style={styles.modalTextName}>James Mike</Text></Text>
@@ -177,6 +207,21 @@ const PlayerScreen = ({ navigation }) => {
                   <Text style={[styles.modaltextStyle, styles.modalAcceptTextStyle,]}>Accept</Text>
                 </TouchableOpacity>
               </View>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={declineVisible}
+          onRequestClose={() => {
+            Alert.alert('Modal has been closed.');
+            setDeclineVisible(!modalVisible);
+          }}>
+          <View style={[styles.centeredView, {margin: 0}]}>
+            <View style={[styles.modalView, { padding: 10}]}>
+              <Text>{declineMsg}</Text>
             </View>
           </View>
         </Modal>
@@ -280,16 +325,10 @@ const styles = StyleSheet.create({
     color: NEUTRAL.gray
   },
   centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
+    flex: 1
   },
   modalView: {
-    margin: 20,
     backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 20,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {

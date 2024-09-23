@@ -35,6 +35,7 @@ app.use('/history', History);
 const wss = new WebSocket.Server({ server });
 let onlineUsers = {};
 let pendingInvitations = {};
+let activeGames = {}; 
 
 wss.on('connection', async (socket) => {
   console.log('A new WebSocket client connected');
@@ -73,35 +74,44 @@ wss.on('connection', async (socket) => {
   });
 
   socket.on('close', () => {
+    let disconnectedUserId = null;
+    
     for (const userId in onlineUsers) {
-        if (onlineUsers[userId].socket === socket) {
-          delete onlineUsers[userId];
-          break;
-        }
+      if (onlineUsers[userId].socket === socket) {
+        disconnectedUserId = userId;
+        delete onlineUsers[userId];
+        break;
+      }
     }
-
+  
+    if (disconnectedUserId) {
+      delete pendingInvitations[disconnectedUserId]; // Remove pending invitations for disconnected users
+    }
+  
     broadcastOnlineUsers();
   });
+  
 
   function handleGameInvitation(fromUser, toUser) {
     if (onlineUsers[toUser]) {
       const { userName } = onlineUsers[fromUser];
-
+      
       // Send invitation to the recipient
       onlineUsers[toUser].socket.send(JSON.stringify({
         type: 'gameInvitation',
         fromUser,
         userName,
       }));
-
+  
       // Mark the invitation as pending
       pendingInvitations[toUser] = fromUser;
-
+  
       // Notify the sender that the invitation is pending
       onlineUsers[fromUser].socket.send(JSON.stringify({
         type: 'invitationPending',
         toUser,
       }));
+      
     } else {
       // Notify the sender that the user is not online
       onlineUsers[fromUser].socket.send(JSON.stringify({
@@ -110,20 +120,35 @@ wss.on('connection', async (socket) => {
       }));
     }
   }
+  
 
   function handleAcceptInvite(invitee, inviter) {
     if (pendingInvitations[invitee] === inviter) {
+      const inviteeName = onlineUsers[invitee].userName;
+      const inviterName = onlineUsers[inviter].userName;
       // Notify the inviter that the invitation was accepted
       onlineUsers[inviter].socket.send(JSON.stringify({
         type: 'inviteAccepted',
         invitee,
+        inviteeName,
+        inviterName,
       }));
 
       // Notify the invitee that the invitation was accepted
       onlineUsers[invitee].socket.send(JSON.stringify({
         type: 'inviteAccepted',
         inviter,
+        inviteeName,
+        inviterName,
       }));
+
+      // Create a new game entry
+      activeGames[inviter] = {
+        invitee: invitee,
+        inviter: inviter,
+        inviteeReady: false,
+        inviterReady: false,
+      };
 
       // Notify both users to start the game
       onlineUsers[inviter].socket.send(JSON.stringify({
@@ -142,16 +167,21 @@ wss.on('connection', async (socket) => {
 
   function handleDeclineInvite(invitee, inviter) {
     if (pendingInvitations[invitee] === inviter) {
+
+      const inviteeName = onlineUsers[invitee].userName;
+      const inviterName = onlineUsers[inviter].userName;
       // Notify the inviter that the invitation was declined
       onlineUsers[inviter].socket.send(JSON.stringify({
         type: 'inviteDeclined',
         invitee,
+        inviteeName
       }));
 
       // Notify the invitee that they declined the invitation
       onlineUsers[invitee].socket.send(JSON.stringify({
         type: 'inviteDeclined',
         inviter,
+        inviterName
       }));
 
       // Remove the pending invitation
