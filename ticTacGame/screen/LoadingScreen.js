@@ -28,7 +28,6 @@ const LoadingScreen = ({navigation}) => {
         if(data.success){
           navigation.navigate("Home")
           setProfile(data.user);
-          console.log(profile);
         }else{
           await AsyncStorage.removeItem('token')
           navigation.navigate("register")

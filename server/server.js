@@ -45,20 +45,16 @@ wss.on('connection', async (socket) => {
   socket.on('message', async (message) => {
     try {
         const data = JSON.parse(message);
-        const { userId, type, toUser } = data;
+        const { userId, type, toUser, position, gameId } = data;
 
         if(type === 'inviteToGame'){
-          
           handleGameInvitation(userId, toUser);
-          
         }else if (type === 'acceptInvite') {
-
           handleAcceptInvite(userId, toUser);
-
         } else if (type === 'declineInvite') {
-
           handleDeclineInvite(userId, toUser);
-
+        }else if (type === 'makeMove') {
+          handleGameMove(userId, position, gameId);
         }else{
           const user = await User.findById(userId).select('userName inGame');
           if(user){
@@ -121,7 +117,6 @@ wss.on('connection', async (socket) => {
     }
   }
   
-
   function handleAcceptInvite(invitee, inviter) {
     if (pendingInvitations[invitee] === inviter) {
       const inviteeName = onlineUsers[invitee].userName;
@@ -142,22 +137,27 @@ wss.on('connection', async (socket) => {
         inviterName,
       }));
 
-      // Create a new game entry
-      activeGames[inviter] = {
-        invitee: invitee,
-        inviter: inviter,
-        inviteeReady: false,
-        inviterReady: false,
+      // Create a new game with an empty board and set the current turn to the inviter
+      // Create a new game with a unique ID
+      const gameId = `${inviter}-${invitee}`;
+      activeGames[gameId] = {
+        invitee,
+        inviter,
+        board: Array(9).fill(null), // Initialize board
+        currentTurn: inviter, // Inviter goes first
       };
 
       // Notify both users to start the game
       onlineUsers[inviter].socket.send(JSON.stringify({
         type: 'startGame',
         with: invitee,
+        gameId,
       }));
+      
       onlineUsers[invitee].socket.send(JSON.stringify({
         type: 'startGame',
         with: inviter,
+        gameId,
       }));
 
       // Remove the pending invitation
@@ -188,6 +188,75 @@ wss.on('connection', async (socket) => {
       delete pendingInvitations[invitee];
     }
   }
+
+  function handleGameMove(userId, position, gameId) {
+    const game = activeGames[gameId];
+  
+    if (!game) return;
+  
+    // Validate move: check if it's the player's turn and if the position is empty
+    if (game.currentTurn !== userId || game.board[position] !== null) {
+      return;  // Invalid move
+    }
+  
+    // Update the board with 'X' for inviter and 'O' for invitee
+    game.board[position] = (userId === game.inviter) ? 'X' : 'O';
+  
+    // Check for winner or tie
+    const winner = checkForWinner(game.board);
+    
+    // Broadcast the updated board and result to both players
+    const opponent = (game.inviter === userId) ? game.invitee : game.inviter;
+    broadcastGameUpdate(gameId, position, userId, opponent, winner);
+  
+    // Update turn if there's no winner
+    if (!winner) {
+      game.currentTurn = opponent; // Switch turn
+    } else {
+      // End the game if there's a winner or tie
+      delete activeGames[gameId];
+    }
+  }
+  
+  function broadcastGameUpdate(gameId, position, playerId, opponentId, winner) {
+    const game = activeGames[gameId];
+    
+    // Notify both players
+    [playerId, opponentId].forEach(userId => {
+      if (onlineUsers[userId]) {
+        onlineUsers[userId].socket.send(JSON.stringify({
+          type: 'gameUpdate',
+          position,
+          player: playerId,
+          board: game.board,
+          winner,  // Null if no winner yet, or 'X', 'O', or 'Tie' if game over
+        }));
+      }
+    });
+  }
+  
+  function checkForWinner(board) {
+    const winPatterns = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+      [0, 4, 8], [2, 4, 6]             // Diagonals
+    ];
+  
+    // Check for winner
+    for (let pattern of winPatterns) {
+      const [a, b, c] = pattern;
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+        return board[a];  // Return 'X' or 'O'
+      }
+    }
+  
+    // Check for tie
+    if (!board.includes(null)) {
+      return 'Tie';
+    }
+  
+    return null;  // No winner or tie yet
+  }  
 
   function broadcastOnlineUsers() {
     const onlineUserList = Object.entries(onlineUsers).map(([userId, { userName, inGame }]) => ({ userId, userName, inGame }));

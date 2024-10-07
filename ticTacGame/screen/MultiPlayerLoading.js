@@ -13,28 +13,16 @@ const ResponsiveView = () => {
 const MultiPlayerLoading = ({navigation, route }) => {
 
     const { inviterId, inviteeId } = route.params;
-    const [ready, setReady] = useState(false);
-    const socketRef = useRef(null);
-    
+
     useEffect(() => {
-        socketRef.current = new WebSocket(WEB_SOCKET_URL);
-    
-        socketRef.current.onopen = () => {
-          socketRef.current.send(JSON.stringify({ userId: inviteeId })); // Send inviteeId when connecting
-        };
-    
-        socketRef.current.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-    
-          if (data.type === 'startGame') {
-            // Navigate to the multiplayer game screen once both players are ready
-            navigation.navigate('MultiPlayer', { inviterId, inviteeId });
-          }
-        };
-    
-        return () => {
-          socketRef.current.close();
-        };
+      const timer = setTimeout(() => {
+        navigation.replace('MultiPlayer', {
+            inviterId: inviterId,
+            inviteeId: inviteeId
+          }); 
+      }, 3000); 
+  
+      return () => clearTimeout(timer);
     }, []);
 
   return (
