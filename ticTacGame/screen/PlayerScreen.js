@@ -5,7 +5,7 @@ import Search from "../common/image/Search"
 import { useLogin } from '../context/LoginProvider'
 
 const PlayerScreen = ({ navigation }) => {
-  const {onlineUsers, declineMsg, modalVisible, declineVisible, handleInvite, handleCancel, handleAccept, setModalVisible} = useLogin()
+  const {onlineUsers, declineMsg, modalVisible, declineVisible, handleInvite, handleCancel, handleAccept, setModalVisible, setDeclineVisible} = useLogin()
 
   const showOnlineUser = (item) => {
       const {inGame, userName, userId} = item.item      

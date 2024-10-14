@@ -3,27 +3,27 @@ import { DARK_MODE, LIGHT_MODE } from '../common/color'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { WEB_SOCKET_URL } from '../env'
 import { LogBox } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const LoginContext = createContext()
 LogBox.ignoreAllLogs()
 
 const LoginProvider = ({ children }) => {
 
-
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const[profile, setProfile] = useState([])
   const[mode, setMode] = useState(LIGHT_MODE)
   const[changeMode, setChangeMode] = useState(false)
-  const [inviterId, setInviterId] = useState(null); 
+  const [inviterId, setInviterId] = useState(""); 
   const [declineMsg, setDeclineMsg] = useState('');
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [declineVisible, setDeclineVisible] = useState(false);
   const socketRef = useRef(null);
+  const navigation = useNavigation()
 
   const socketService = async () => {
     socketRef.current = new WebSocket(WEB_SOCKET_URL);
-    console.log("hello", profile);
 
     socketRef.current.onopen = () => {
       socketRef.current.send(JSON.stringify({ userId: profile._id }));
@@ -59,16 +59,21 @@ const LoginProvider = ({ children }) => {
           setTimeout(() => {
             setDeclineVisible(false)
           }, 3000)
-          return  // Set the online users
+          return 
         }
 
         if (data.type === 'startGame') {
-          navigation.navigate('MultiLoading', {
-            inviterId: inviterId,
-            inviteeId: profile._id,
-          });
-          return  // Set the online users
+          navigation.navigate('MultiLoading');
+          return 
         }
+
+      if (data.type === 'gameUpdate') {
+        console.log(data);
+        
+        // setBoard(data.board);
+        // setCurrentTurn(data.currentTurn);
+        // checkForWinner(data.board);
+      }
       
       // const filteredUsers = users.filter(user => user.userId !== profile._id )
       } catch (error) {
@@ -83,10 +88,10 @@ const LoginProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    if(profile !== ''){
+    if(profile.length !== 0){
       socketService()
     }
-  }, [])
+  }, [profile])
 
   useEffect(() => {
     const loadMode = async () => {
@@ -165,7 +170,7 @@ const LoginProvider = ({ children }) => {
   }
 
   return (
-    <LoginContext.Provider  value={{ isLoggedIn, setIsLoggedIn, profile, setProfile, mode, handleInvite, handleCancel, handleAccept, onlineUsers, declineMsg, modalVisible, declineVisible, setModalVisible, setDeclineVisible}}>
+    <LoginContext.Provider  value={{ isLoggedIn, setIsLoggedIn, profile, setProfile, mode, handleInvite, handleCancel, handleAccept, onlineUsers, declineMsg, modalVisible, declineVisible, setModalVisible, setDeclineVisible, inviterId, socketRef}}>
       {children}
     </LoginContext.Provider>
   )

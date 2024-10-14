@@ -21,9 +21,9 @@ export default function App() {
   }
 
   return (
-    <LoginProvider>
+    // <LoginProvider>
       <Navigation />
-    </LoginProvider>
+    // </LoginProvider>
     
   );
 }

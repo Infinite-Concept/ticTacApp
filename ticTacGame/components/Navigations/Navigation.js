@@ -12,6 +12,7 @@ import LoginScreen from '../../screen/LoginScreen';
 import LoadingScreen from '../../screen/LoadingScreen';
 import MultiPlayerLoading from '../../screen/MultiPlayerLoading'
 import MultiPlayerScreen from '../../screen/MultiPlayerScreen';
+import LoginProvider from '../../context/LoginProvider';
 
 const Stack = createNativeStackNavigator();
 const userInfo = {}
@@ -19,22 +20,26 @@ const userInfo = {}
 const Navigation = () => {
   return (
     <NavigationContainer>
+      <LoginProvider>
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        <Stack.Screen name="splash" component={SplashScreen}  />
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-        <Stack.Screen name="register"  >
-          {props => <RegisterScreen {...props} userInfo={userInfo} />}
-        </Stack.Screen>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="History" component={HistoryScreen} />
-        <Stack.Screen name="Scoreboard" component={ScoreboardScreen} />
-        <Stack.Screen name="GameboardLoading" component={GameBoardLoading} />
-        <Stack.Screen name="Gameboard" component={GameBoard} />
-        <Stack.Screen name="LoginLoading" component={LoadingScreen} />
-        <Stack.Screen name="MultiLoading" component={MultiPlayerLoading} />
-        <Stack.Screen name="MultiPlayer" component={MultiPlayerScreen} />
+        
+          <Stack.Screen name="splash" component={SplashScreen}  />
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+          <Stack.Screen name="register"  >
+            {props => <RegisterScreen {...props} userInfo={userInfo} />}
+          </Stack.Screen>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="History" component={HistoryScreen} />
+          <Stack.Screen name="Scoreboard" component={ScoreboardScreen} />
+          <Stack.Screen name="GameboardLoading" component={GameBoardLoading} />
+          <Stack.Screen name="Gameboard" component={GameBoard} />
+          <Stack.Screen name="LoginLoading" component={LoadingScreen} />
+          <Stack.Screen name="MultiLoading" component={MultiPlayerLoading} />
+          <Stack.Screen name="MultiPlayer" component={MultiPlayerScreen} />
+        
       </Stack.Navigator>
+      </LoginProvider>
     </NavigationContainer>
   )
 }

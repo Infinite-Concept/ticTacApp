@@ -57,6 +57,8 @@ wss.on('connection', async (socket) => {
           handleGameMove(userId, position, gameId);
         }else{
           const user = await User.findById(userId).select('userName inGame');
+          console.log(userId);
+          
           if(user){
               onlineUsers[userId] = { socket, userName: user.userName, inGame: user.inGame };
               broadcastOnlineUsers();
@@ -153,7 +155,7 @@ wss.on('connection', async (socket) => {
         with: invitee,
         gameId,
       }));
-      
+
       onlineUsers[invitee].socket.send(JSON.stringify({
         type: 'startGame',
         with: inviter,

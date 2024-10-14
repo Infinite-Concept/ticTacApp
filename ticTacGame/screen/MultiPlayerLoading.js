@@ -10,16 +10,11 @@ const ResponsiveView = () => {
     return <View style={styles.item} />;
 };
 
-const MultiPlayerLoading = ({navigation, route }) => {
-
-    const { inviterId, inviteeId } = route.params;
+const MultiPlayerLoading = ({navigation }) => {
 
     useEffect(() => {
       const timer = setTimeout(() => {
-        navigation.replace('MultiPlayer', {
-            inviterId: inviterId,
-            inviteeId: inviteeId
-          }); 
+        navigation.replace('MultiPlayer'); 
       }, 3000); 
   
       return () => clearTimeout(timer);
