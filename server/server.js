@@ -149,17 +149,26 @@ wss.on('connection', async (socket) => {
         currentTurn: inviter, // Inviter goes first
       };
 
+      // Set both users as in-game
+      onlineUsers[invitee].inGame = true;
+      onlineUsers[inviter].inGame = true;
+      
+      // Broadcast updated user list
+      broadcastOnlineUsers();
+
       // Notify both users to start the game
       onlineUsers[inviter].socket.send(JSON.stringify({
         type: 'startGame',
         with: invitee,
         gameId,
+        currentTurn: inviter,
       }));
 
       onlineUsers[invitee].socket.send(JSON.stringify({
         type: 'startGame',
         with: inviter,
         gameId,
+        currentTurn: inviter,
       }));
 
       // Remove the pending invitation
@@ -208,14 +217,21 @@ wss.on('connection', async (socket) => {
     const winner = checkForWinner(game.board);
     
     // Broadcast the updated board and result to both players
-    const opponent = (game.inviter === userId) ? game.invitee : game.inviter;
+    const opponent = (game.inviter !== userId) ? game.invitee : game.inviter;
     broadcastGameUpdate(gameId, position, userId, opponent, winner);
   
     // Update turn if there's no winner
     if (!winner) {
       game.currentTurn = opponent; // Switch turn
     } else {
-      // End the game if there's a winner or tie
+      // If the game ends, set both users' inGame status to false
+      onlineUsers[game.invitee].inGame = false;
+      onlineUsers[game.inviter].inGame = false;
+      
+      // Broadcast updated user list
+      broadcastOnlineUsers();
+
+      // Remove the game from activeGames
       delete activeGames[gameId];
     }
   }
@@ -231,6 +247,7 @@ wss.on('connection', async (socket) => {
           position,
           player: playerId,
           board: game.board,
+          currentTurn: game.currentTurn,
           winner,  // Null if no winner yet, or 'X', 'O', or 'Tie' if game over
         }));
       }
